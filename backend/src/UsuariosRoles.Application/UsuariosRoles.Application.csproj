@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Casos de uso, DTOs, validación y contratos (interfaces) que implementa Infrastructure. -->
+  <ItemGroup>
+    <ProjectReference Include="..\UsuariosRoles.Domain\UsuariosRoles.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="UsuariosRoles.UnitTests" />
+  </ItemGroup>
+</Project>

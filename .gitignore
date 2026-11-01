@@ -1,0 +1,30 @@
+# --- .NET ---
+bin/
+obj/
+TestResults/
+*.user
+*.suo
+.vs/
+*.db
+*.db-shm
+*.db-wal
+
+# --- Node / Vite ---
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+
+# --- Entorno y secretos ---
+.env
+.env.*
+!.env.example
+
+# --- Editores / SO ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

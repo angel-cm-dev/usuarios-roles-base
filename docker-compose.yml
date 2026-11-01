@@ -1,0 +1,57 @@
+# Levanta todo el sistema con un comando:  docker compose up --build
+# Frontend + API (vía nginx): http://localhost:8080   ·   API directa (Scalar): http://localhost:5080/scalar
+name: usuarios-roles-base
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-usuarios_roles}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-usuarios_roles}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Database__Provider: Postgres
+      ConnectionStrings__Default: Host=db;Port=5432;Database=${POSTGRES_DB:-usuarios_roles};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      # Clave de EJEMPLO: cámbiala en .env (mínimo 32 caracteres) antes de cualquier despliegue real.
+      Jwt__Key: ${JWT_KEY:-EJEMPLO-docker-compose-cambia-esta-clave-32+bytes!!}
+      Jwt__AccessTokenMinutes: ${JWT_ACCESS_TOKEN_MINUTES:-15}
+      # Demo local sobre http://localhost: en producción con HTTPS debe ser true.
+      AuthCookie__Secure: ${AUTH_COOKIE_SECURE:-false}
+      AppUrls__FrontendBaseUrl: ${FRONTEND_BASE_URL:-http://localhost:8080}
+      ReverseProxy__TrustAllProxies: "true"
+      # Buzón de desarrollo activo para poder verificar emails en la demo. Desactívalo con SMTP real.
+      Features__DevMailbox: ${DEV_MAILBOX:-true}
+      OpenApi__Enabled: ${OPENAPI_ENABLED:-true}
+      Seed__DemoUsers: ${SEED_DEMO_USERS:-true}
+      RateLimiting__AuthPermitLimit: ${AUTH_RATE_LIMIT:-10}
+    ports:
+      - "5080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
